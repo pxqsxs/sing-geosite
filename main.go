@@ -59,17 +59,18 @@ func get(downloadURL *string) ([]byte, error) {
 }
 
 func download(release *github.RepositoryRelease) ([]byte, error) {
+	// 改为使用 Loyalsoldier/v2ray-rules-dat 的 geosite.dat
 	geositeAsset := common.Find(release.Assets, func(it *github.ReleaseAsset) bool {
-		return *it.Name == "dlc.dat"
+		return *it.Name == "geosite.dat"
 	})
 	geositeChecksumAsset := common.Find(release.Assets, func(it *github.ReleaseAsset) bool {
-		return *it.Name == "dlc.dat.sha256sum"
+		return *it.Name == "geosite.dat.sha256sum"
 	})
 	if geositeAsset == nil {
 		return nil, E.New("geosite asset not found in upstream release ", release.Name)
 	}
 	if geositeChecksumAsset == nil {
-		return nil, E.New("geosite asset not found in upstream release ", release.Name)
+		return nil, E.New("geosite checksum asset not found in upstream release ", release.Name)
 	}
 	data, err := get(geositeAsset.BrowserDownloadURL)
 	if err != nil {
@@ -366,7 +367,6 @@ func generate(release *github.RepositoryRelease, output string, cnOutput string,
 		}
 		srsPath, _ := filepath.Abs(filepath.Join(ruleSetOutput, "geosite-"+code+".srs"))
 		unstableSRSPath, _ := filepath.Abs(filepath.Join(ruleSetUnstableOutput, "geosite-"+code+".srs"))
-		// os.Stderr.WriteString("write " + srsPath + "\n")
 		var (
 			outputRuleSet         *os.File
 			outputRuleSetUnstable *os.File
@@ -422,7 +422,9 @@ func release(source string, destination string, output string, cnOutput string, 
 
 func main() {
 	err := release(
-		"v2fly/domain-list-community",
+		// 上游改成 Loyalsoldier/v2ray-rules-dat
+		"Loyalsoldier/v2ray-rules-dat",
+		// 这里是“目标仓库”，如果你 fork 后在自己仓库跑 CI，建议改成 "你的用户名/sing-geosite"
 		"sagernet/sing-geosite",
 		"geosite.db",
 		"geosite-cn.db",
